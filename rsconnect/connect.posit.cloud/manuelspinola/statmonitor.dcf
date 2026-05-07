@@ -1,0 +1,12 @@
+name: statmonitor
+title: StatMonitor
+username: manuelspinola
+account: manuelspinola
+server: connect.posit.cloud
+hostUrl: https://api.connect.posit.cloud/v1
+appId: 019e0001-4d64-31fb-75eb-2efa887264c4
+bundleId:
+url:
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

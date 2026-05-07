@@ -12,6 +12,12 @@ library(DT)
 library(scales)
 library(readxl)
 
+# rtrim no está en el repositorio estándar de Posit Cloud — instalar si falta
+if (!requireNamespace("rtrim", quietly = TRUE)) {
+  install.packages("rtrim")
+}
+library(rtrim)
+
 # ── Paleta de colores StatMonitor ────────────────────────────
 # Tableau Color Blind — accesible y profesional
 colores <- list(
@@ -56,12 +62,13 @@ tema_app <- bs_theme(
 ) |>
   bs_add_rules("
   .navbar { background-color: #1170AA !important; }
-  .navbar-brand, .nav-link { color: #ffffff !important; }
-  .nav-link.active { border-bottom: 2px solid #FC7D0B; }
+  .navbar-brand { color: #ffffff !important; display: flex !important;
+                  align-items: center !important;
+                  padding-top: 0 !important; padding-bottom: 0 !important; }
+  .navbar .nav-link { color: #ffffff !important; }
+  .navbar .nav-link.active { border-bottom: 2px solid #FC7D0B; }
   .btn-primary { background-color: #FC7D0B; border-color: #FC7D0B; color: #ffffff; }
   .btn-primary:hover { background-color: #d4680a; border-color: #d4680a; }
-  .navbar-brand { display: flex !important; align-items: center !important;
-                  padding-top: 0 !important; padding-bottom: 0 !important; }
   .card-header { background-color: #EEF3FA; font-weight: 700;
                  border-bottom: 2px solid #C8D9EC; }
   .badge-trim { background-color: #1170AA; color: white; border-radius: 4px;
@@ -94,20 +101,37 @@ datos_ejemplo <- list(
   
   # ── 1. Conteos anuales de aves por punto (estilo TRIM)
   # Simula monitoreo de Trogon melanocephalus en Sarapiquí
+  # Tendencia decreciente significativa (~8% por año) — fragmentación de bosque
   conteos_aves = {
-    sitios <- paste0("Sitio_", 1:12)
-    anios  <- 2012:2023
+    sitios <- paste0("Sitio_", 1:20)
+    anios  <- 2008:2023
     expand_grid(site = sitios, year = anios) |>
       mutate(
-        # Tendencia decreciente moderada + variabilidad
-        mu    = 8 * exp(-0.04 * (year - 2012)) + rnorm(n(), 0, 0.3),
+        t     = year - 2008,
+        # Lambda decreciente clara, sin ruido aditivo — solo variabilidad Poisson
+        mu    = pmax(0.5, 12 * exp(-0.085 * t)),
+        count = rpois(n(), lambda = mu)
+      ) |>
+      select(site, year, count)
+  },
+  
+  # ── 2. Conteos anuales de mamíferos por punto de aguada (estilo TRIM)
+  # Simula monitoreo de Tapirus bairdii (danta) en Tortuguero
+  # Tendencia estable — sin cambio significativo, área protegida reciente
+  conteos_mamiferos = {
+    sitios <- paste0("Aguada_", 1:8)
+    anios  <- 2014:2023
+    expand_grid(site = sitios, year = anios) |>
+      mutate(
+        mu    = 4.0 + 0.05 * (year - 2014) + rnorm(n(), 0, 0.5),
         count = pmax(0L, rpois(n(), lambda = pmax(0.1, mu)))
       ) |>
       select(site, year, count)
   },
   
-  # ── 2. Presencia/ausencia por cámara trampa
+  # ── 3. Presencia/ausencia por cámara trampa
   # Danta, Puma y Tepezcuintle — 20 estaciones, 3 temporadas
+  # NOTA: formato para modelos de ocupación (StatOcu), no para TRIM
   camaras = {
     estaciones <- paste0("CT_", sprintf("%02d", 1:20))
     temporadas <- c("Seca_2021", "Lluviosa_2021", "Seca_2022")
@@ -120,7 +144,6 @@ datos_ejemplo <- list(
         cobertura_boscosa = round(runif(n(), 40, 95), 1),
         distancia_borde_m = round(runif(n(), 10, 800), 0)
       )
-  },
-  
+  }
   
 )

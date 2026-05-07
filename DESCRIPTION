@@ -1,0 +1,27 @@
+Package: StatMonitor
+Title: StatMonitor - Monitoreo biológico y de la biodiversidad
+Version: 1.0.0
+Description: Aplicación Shiny modular para el diseño, implementación y análisis
+    de programas de monitoreo de fauna y flora silvestre. Incluye análisis de
+    tendencias poblacionales mediante el modelo TRIM, visualización de índices
+    de abundancia y un panorama pedagógico de las principales técnicas de
+    análisis para monitoreo biológico.
+    Parte de la suite StatSuite de herramientas educativas para biología
+    y recursos naturales.
+Authors@R: person(
+    given  = "Manuel",
+    family = "Spínola",
+    role   = c("aut", "cre"),
+    email  = "romeo.spinola.parallada@una.cr"
+  )
+Depends: R (>= 4.1.0)
+Imports:
+    shiny,
+    bslib,
+    bsicons,
+    tidyverse,
+    DT,
+    scales,
+    readxl,
+    rtrim
+License: MIT

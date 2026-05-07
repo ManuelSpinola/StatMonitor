@@ -24,7 +24,7 @@ source("modules/mod_acerca_de.R")
 ui <- page_navbar(
   title = div(
     style = "display: flex; align-items: center; gap: 10px; margin-top: 4px;",
-    # img(src = "hexsticker_StatMonitor.png", height = "38px"),
+    img(src = "hexsticker_StatMonitor.png", height = "38px"),
     span("StatMonitor", style = "font-weight: 600;")
   ),
   theme  = tema_app,

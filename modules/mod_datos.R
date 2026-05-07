@@ -31,10 +31,10 @@ mod_datos_ui <- function(id) {
             condition = paste0("input['", ns("fuente"), "'] == 'ejemplo'"),
             selectInput(ns("ejemplo_sel"), "Conjunto de ejemplo:",
                         choices = c(
-                          "Conteos de aves (Sarapiquí)"  = "conteos_aves",
-                          "Cámaras trampa (mamíferos)"   = "camaras",
-                          "Plantas en parcelas"          = "plantas"
-                        ))
+                          "Conteos de aves — Trogon (Sarapiquí)"       = "conteos_aves",
+                          "Conteos de mamíferos — Danta (Tortuguero)"  = "conteos_mamiferos"
+                        )),
+            uiOutput(ns("nota_camaras"))
           ),
           actionButton(ns("cargar"), "Cargar datos",
                        class = "btn-primary w-100 mt-2",
@@ -57,13 +57,25 @@ mod_datos_server <- function(id) {
     
     datos_r <- reactiveVal(NULL)
     
+    # ── Nota pedagógica para cámaras trampa ─────────────
+    output$nota_camaras <- renderUI({
+      req(input$ejemplo_sel == "camaras")
+      div(
+        class = "alert alert-warning small py-2 px-3 mt-2 mb-0",
+        bs_icon("info-circle-fill", class = "me-1"),
+        strong("Datos de presencia/ausencia:"), " este conjunto es para ",
+        "modelos de ocupación (", em("StatOcu"), "). ",
+        "Para el módulo de Tendencias usá los conjuntos de conteos anuales."
+      )
+    })
+    
     observeEvent(input$cargar, {
       if (input$fuente == "ejemplo") {
         datos_r(datos_ejemplo[[input$ejemplo_sel]])
       } else {
         req(input$archivo)
-        ext  <- tools::file_ext(input$archivo$name)
-        df   <- leer_archivo(input$archivo$datapath, ext)
+        ext <- tools::file_ext(input$archivo$name)
+        df  <- leer_archivo(input$archivo$datapath, ext)
         datos_r(df)
       }
     })
@@ -76,9 +88,11 @@ mod_datos_server <- function(id) {
             "Hacé clic en 'Cargar datos' para comenzar.")
       )
       div(class = "mb-2 small",
-          span(class = "badge me-1", style = "background:#1170AA;color:white;",
+          span(class = "badge me-1",
+               style = "background:#1170AA;color:white;",
                paste(nrow(df), "filas")),
-          span(class = "badge", style = "background:#FC7D0B;color:white;",
+          span(class = "badge",
+               style = "background:#FC7D0B;color:white;",
                paste(ncol(df), "columnas"))
       )
     })
