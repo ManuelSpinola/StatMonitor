@@ -22,20 +22,44 @@ mod_datos_ui <- function(id) {
                        choices = c("Datos de ejemplo" = "ejemplo",
                                    "Cargar archivo"   = "archivo"),
                        selected = "ejemplo"),
-          conditionalPanel(
-            condition = paste0("input['", ns("fuente"), "'] == 'archivo'"),
-            fileInput(ns("archivo"), "Seleccioná un archivo CSV o Excel:",
-                      accept = c(".csv", ".xlsx", ".xls"))
-          ),
+          
+          # ── Datos de ejemplo ──────────────────────────
           conditionalPanel(
             condition = paste0("input['", ns("fuente"), "'] == 'ejemplo'"),
             selectInput(ns("ejemplo_sel"), "Conjunto de ejemplo:",
                         choices = c(
-                          "Conteos de aves — Trogon (Sarapiquí)"       = "conteos_aves",
-                          "Conteos de mamíferos — Danta (Tortuguero)"  = "conteos_mamiferos"
-                        )),
-            uiOutput(ns("nota_camaras"))
+                          "Conteos de aves — Trogon (Sarapiquí)"      = "conteos_aves",
+                          "Conteos de mamíferos — Danta (Tortuguero)" = "conteos_mamiferos"
+                        ))
           ),
+          
+          # ── Archivo propio + guía de formato ──────────
+          conditionalPanel(
+            condition = paste0("input['", ns("fuente"), "'] == 'archivo'"),
+            fileInput(ns("archivo"), "Seleccioná un archivo CSV o Excel:",
+                      accept = c(".csv", ".xlsx", ".xls")),
+            div(
+              class = "alert alert-info small py-2 px-3 mb-2",
+              bs_icon("info-circle-fill", class = "me-1"),
+              strong("Formato requerido para TRIM:"),
+              tags$ul(
+                class = "mb-1 mt-1",
+                tags$li(tags$code("site"), " — identificador del sitio de muestreo"),
+                tags$li(tags$code("year"), " — año del conteo (número entero)"),
+                tags$li(tags$code("count"), " — individuos contados (entero ≥ 0; ",
+                        tags$code("NA"), " si el sitio no fue visitado)")
+              ),
+              "Los nombres de columna no tienen que ser exactamente esos — ",
+              "los seleccionás en el módulo de Tendencias."
+            ),
+            div(
+              class = "alert alert-warning small py-2 px-3 mb-0",
+              bs_icon("exclamation-triangle-fill", class = "me-1"),
+              strong("Formato largo:"), " cada fila debe ser una combinación única ",
+              "de sitio y año — no una columna por año."
+            )
+          ),
+          
           actionButton(ns("cargar"), "Cargar datos",
                        class = "btn-primary w-100 mt-2",
                        icon = icon("play"))
@@ -56,18 +80,6 @@ mod_datos_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
     datos_r <- reactiveVal(NULL)
-    
-    # ── Nota pedagógica para cámaras trampa ─────────────
-    output$nota_camaras <- renderUI({
-      req(input$ejemplo_sel == "camaras")
-      div(
-        class = "alert alert-warning small py-2 px-3 mt-2 mb-0",
-        bs_icon("info-circle-fill", class = "me-1"),
-        strong("Datos de presencia/ausencia:"), " este conjunto es para ",
-        "modelos de ocupación (", em("StatOcu"), "). ",
-        "Para el módulo de Tendencias usá los conjuntos de conteos anuales."
-      )
-    })
     
     observeEvent(input$cargar, {
       if (input$fuente == "ejemplo") {
