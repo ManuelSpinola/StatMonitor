@@ -277,6 +277,30 @@ mod_tendencias_ui <- function(id) {
       nav_panel(
         title = tagList(bs_icon("table", class = "me-1"), "Índices por año"),
         card_body(uiOutput(ns("tabla_indices_ui")))
+      ),
+      
+      # ── Pestaña 5: Código R ───────────────────────────
+      nav_panel(
+        title = tagList(bs_icon("code-slash", class = "me-1"), "Código R"),
+        card_body(
+          p(
+            "Script que reproduce este análisis TRIM con tus datos.",
+            class = "text-muted small mb-3"
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              tagList(bs_icon("code-slash"), " Script reproducible"),
+              downloadButton(
+                ns("descargar_script"),
+                label = "Descargar .R",
+                icon  = bs_icon("download"),
+                class = "btn-sm btn-outline-primary"
+              )
+            ),
+            verbatimTextOutput(ns("codigo_r"))
+          )
+        )
       )
     )
   )
@@ -606,5 +630,93 @@ mod_tendencias_server <- function(id, datos) {
           backgroundPosition = "center"
         )
     })
+    
+    # ── Código R reproducible ─────────────────────────────
+    codigo_generado <- eventReactive(input$correr, {
+      req(df_activo(), input$col_sitio, input$col_anio, input$col_conteo)
+      
+      col_sitio  <- input$col_sitio
+      col_anio   <- input$col_anio
+      col_conteo <- input$col_conteo
+      modelo     <- input$modelo
+      serialcor  <- input$serialcor
+      overdisp   <- input$overdisp
+      
+      encabezado <- encabezado_script("StatMonitor", "Tendencias — Modelo TRIM")
+      
+      paste0(
+        encabezado,
+        "library(tidyverse)\n",
+        "library(rtrim)\n\n",
+        "# ── Cargar datos ──\n",
+        "# El archivo debe tener columnas de sitio, año y conteo\n",
+        "datos <- read.csv(\"tu_archivo.csv\")\n\n",
+        "# ── Preparar datos para TRIM ──\n",
+        "# TRIM requiere columnas llamadas site, year y count\n",
+        "df_trim <- datos |>\n",
+        "  rename(\n",
+        "    site  = `", col_sitio,  "`,\n",
+        "    year  = `", col_anio,   "`,\n",
+        "    count = `", col_conteo, "`\n",
+        "  ) |>\n",
+        "  select(site, year, count) |>\n",
+        "  mutate(\n",
+        "    site  = as.factor(site),\n",
+        "    year  = as.integer(year),\n",
+        "    count = as.integer(count)\n",
+        "  )\n\n",
+        "# ── Ajustar modelo TRIM ──\n",
+        "# Modelo ", modelo, ": ",
+        if (modelo == "2") "tendencia lineal en el tiempo\n" else "efecto independiente por año\n",
+        "z <- trim(\n",
+        "  count ~ site + year,\n",
+        "  data      = df_trim,\n",
+        "  model     = ", modelo, ",\n",
+        "  serialcor = ", tolower(serialcor), ",   # autocorrelación serial\n",
+        "  overdisp  = ", tolower(overdisp),  "    # sobredispersión\n",
+        ")\n\n",
+        "# ── Resumen del modelo ──\n",
+        "summary(z)\n\n",
+        "# ── Índices generales por año ──\n",
+        "ov <- overall(z)\n",
+        "print(ov)\n\n",
+        "# ── Pendiente (tasa de cambio) ──\n",
+        "sl <- ov$slope\n",
+        "# Tasa de cambio anual en porcentaje:\n",
+        "round((exp(sl$add) - 1) * 100, 2)\n\n",
+        "# ── Gráfico de tendencia ──\n",
+        "df_plot <- data.frame(\n",
+        "  year  = ov$timept,\n",
+        "  index = ov$tt,\n",
+        "  se    = ov$err\n",
+        ") |>\n",
+        "  mutate(\n",
+        "    lower = index - 1.96 * se,\n",
+        "    upper = index + 1.96 * se\n",
+        "  )\n\n",
+        "ggplot(df_plot, aes(x = year)) +\n",
+        "  geom_ribbon(aes(ymin = lower, ymax = upper),\n",
+        "              fill = \"#5FA2CE\", alpha = 0.2) +\n",
+        "  geom_line(aes(y = index), color = \"#1170AA\",\n",
+        "            linewidth = 1.2) +\n",
+        "  geom_pointrange(aes(y = index, ymin = lower, ymax = upper),\n",
+        "                  color = \"#1170AA\", size = 0.5) +\n",
+        "  scale_x_continuous(breaks = df_plot$year) +\n",
+        "  labs(\n",
+        "    title = \"Tendencia poblacional — Modelo TRIM\",\n",
+        "    x     = \"Año\",\n",
+        "    y     = \"Índice de abundancia\"\n",
+        "  ) +\n",
+        "  theme_minimal(base_size = 13)\n"
+      )
+    })
+    
+    output$codigo_r <- renderText({ codigo_generado() })
+    
+    output$descargar_script <- downloadHandler(
+      filename = function() paste0("trim_", format(Sys.Date(), "%Y%m%d"), ".R"),
+      content  = function(file) writeLines(codigo_generado(), file)
+    )
+    
   })
 }

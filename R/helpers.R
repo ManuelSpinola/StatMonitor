@@ -147,3 +147,15 @@ datos_ejemplo <- list(
   }
   
 )
+# ── Código R reproducible: encabezado estándar ────────────
+# Usada por todos los módulos de StatSuite que generan código R.
+encabezado_script <- function(app, modulo) {
+  paste0(
+    "# ============================================\n",
+    "# ", app, " · StatSuite\n",
+    "# Módulo: ", modulo, "\n",
+    "# Generado: ", format(Sys.Date(), "%Y-%m-%d"), "\n",
+    "# Manuel Spínola · ICOMVIS · UNA · Costa Rica\n",
+    "# ============================================\n\n"
+  )
+}
