@@ -1,27 +1,32 @@
 Package: StatMonitor
-Title: StatMonitor - Monitoreo biológico y de la biodiversidad
+Title: Interactive Biodiversity Monitoring Platform
 Version: 1.0.0
-Description: Aplicación Shiny modular para el diseño, implementación y análisis
-    de programas de monitoreo de fauna y flora silvestre. Incluye análisis de
-    tendencias poblacionales mediante el modelo TRIM, visualización de índices
-    de abundancia y un panorama pedagógico de las principales técnicas de
-    análisis para monitoreo biológico.
-    Parte de la suite StatSuite de herramientas educativas para biología
-    y recursos naturales.
-Authors@R: person(
-    given  = "Manuel",
-    family = "Spínola",
-    role   = c("aut", "cre"),
-    email  = "romeo.spinola.parallada@una.cr"
-  )
-Depends: R (>= 4.1.0)
+Authors@R: 
+    person("Manuel", "Spínola", 
+           email = "manuel.spinola@una.ac.cr",
+           role  = c("aut", "cre"),
+           comment = c(ORCID = ""))
+Description: A Shiny-based interactive platform for biodiversity monitoring,
+    part of the StatSuite ecosystem. Includes modules for monitoring concepts,
+    data loading, trend analysis, and analytical techniques. Designed for
+    teaching and research in ecology and biodiversity sciences.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
 Imports:
-    shiny,
-    bslib,
+    shiny (>= 1.8.0),
+    bslib (>= 0.7.0),
     bsicons,
-    tidyverse,
-    DT,
-    scales,
+    shinyjs,
+    ggplot2,
+    dplyr,
+    tidyr,
+    readr,
     readxl,
-    rtrim
-License: MIT
+    golem
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+URL: https://github.com/ManuelSpinola/StatMonitor
+BugReports: https://github.com/ManuelSpinola/StatMonitor/issues
