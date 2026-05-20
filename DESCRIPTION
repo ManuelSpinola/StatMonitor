@@ -23,6 +23,9 @@ Imports:
     tidyr,
     readr,
     readxl,
+    DT,
+    scales,
+    rtrim,
     golem,
     pkgload
 Suggests:

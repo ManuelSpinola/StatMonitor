@@ -4,19 +4,11 @@
 # Paleta: Tableau Color Blind (ggthemes)
 # ============================================================
 
-library(shiny)
-library(bslib)
-library(bsicons)
-library(tidyverse)
-library(DT)
-library(scales)
-library(readxl)
 
 # rtrim no está en el repositorio estándar de Posit Cloud — instalar si falta
 if (!requireNamespace("rtrim", quietly = TRUE)) {
   install.packages("rtrim")
 }
-library(rtrim)
 
 # ── Paleta de colores StatMonitor ────────────────────────────
 # Tableau Color Blind — accesible y profesional
