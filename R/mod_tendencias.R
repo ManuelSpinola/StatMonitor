@@ -388,7 +388,7 @@ mod_tendencias_server <- function(id, datos) {
     # ── Extrae slope de forma segura para modelo 2 y 3 ──
     # En rtrim, overall()$slope usa $p (no $p_add)
     extraer_slope <- function(z) {
-      ov <- overall(z)
+      ov <- rtrim::overall(z)
       sl <- ov$slope
       # El campo real es $p — crear $p_add como alias para compatibilidad
       if (is.null(sl$p_add) || length(sl$p_add) == 0) {
@@ -409,7 +409,7 @@ mod_tendencias_server <- function(id, datos) {
             "Configurá el modelo y hacé clic en 'Correr TRIM'.")
       )
       
-      ov    <- overall(z)
+      ov    <- rtrim::overall(z)
       sl    <- extraer_slope(z)
       pct   <- round((exp(sl$add) - 1) * 100, 2)
       p_val <- if (is.na(sl$p_add)) 1 else sl$p_add
@@ -469,7 +469,7 @@ mod_tendencias_server <- function(id, datos) {
       z <- trim_result()
       if (is.null(z)) return(NULL)
       sl    <- extraer_slope(z)
-      ov    <- overall(z)
+      ov    <- rtrim::overall(z)
       p_val <- if (is.na(sl$p_add)) NA_real_ else sl$p_add
       card(
         class = "mt-3",
@@ -518,10 +518,10 @@ mod_tendencias_server <- function(id, datos) {
       z  <- trim_result()
       req(z)
       sl    <- extraer_slope(z)
-      ov    <- overall(z)
+      ov    <- rtrim::overall(z)
       p_val <- if (is.na(sl$p_add)) 1 else sl$p_add
       
-      ov <- overall(z)
+      ov <- rtrim::overall(z)
       
       df_plot <- data.frame(
         year  = ov$timept,
@@ -602,7 +602,7 @@ mod_tendencias_server <- function(id, datos) {
       z  <- trim_result()
       req(z)
       
-      ov <- overall(z)
+      ov <- rtrim::overall(z)
       
       df_tbl <- data.frame(
         Año             = ov$timept,
@@ -678,7 +678,7 @@ mod_tendencias_server <- function(id, datos) {
         "# ── Resumen del modelo ──\n",
         "summary(z)\n\n",
         "# ── Índices generales por año ──\n",
-        "ov <- overall(z)\n",
+        "ov <- rtrim::overall(z)\n",
         "print(ov)\n\n",
         "# ── Pendiente (tasa de cambio) ──\n",
         "sl <- ov$slope\n",
