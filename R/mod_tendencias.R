@@ -616,15 +616,15 @@ mod_tendencias_server <- function(id, datos) {
       # styleColorBar falla si el mínimo == 0; añadir pequeño offset
       rng_safe <- c(min(df_tbl$Índice) * 0.95, max(df_tbl$Índice) * 1.05)
       
-      datatable(
+      DT::datatable(
         df_tbl,
         rownames = FALSE,
         options  = list(dom = "t", pageLength = 20, scrollX = TRUE),
         class    = "table-sm table-striped"
       ) |>
-        formatStyle(
+        DT::formatStyle(
           "Índice",
-          background         = styleColorBar(rng_safe, colores$secundario),
+          background         = DT::styleColorBar(rng_safe, colores$secundario),
           backgroundSize     = "100% 80%",
           backgroundRepeat   = "no-repeat",
           backgroundPosition = "center"
